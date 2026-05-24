@@ -1,77 +1,185 @@
 import lime.project.*;
 
 class Project extends HXProject {
+    static inline final GAME_ID:String     = "fragile";
+    static inline final GAME_TITLE:String  = "Fragile";
+    static inline final COMPANY:String     = "Brenninho";
+    static inline final VERSION:String     = "1.0.0";
+    static inline final BUILD_NUM:String   = "1";
+
+    static inline final GAME_WIDTH:Int     = 1280;
+    static inline final GAME_HEIGHT:Int    = 720;
+    static inline final FRAMERATE:Int      = 60;
+    static inline final BG_COLOR:Int       = 0x000000;
+
     public function new() {
         super();
 
-        meta.title       = "Fragile";
-        meta.packageName = "com.brenninho.fragile";
-        meta.version     = "1.0.0";
-        meta.company     = "Brenninho";
-        meta.buildNumber = "1";
+        setupMeta();
+        setupApp();
+        setupSources();
+        setupLibraries();
 
+        if (defines.exists("android"))
+            setupAndroid();
+        else if (defines.exists("ios"))
+            setupIOS();
+        else if (defines.exists("html5"))
+            setupHTML5();
+        else
+            setupDesktop();
+
+        setupAssets();
+        setupDefines();
+        setupFlags();
+    }
+
+    function setupMeta():Void {
+        meta.title       = GAME_TITLE;
+        meta.packageName = 'com.${COMPANY.toLowerCase()}.${GAME_ID}';
+        meta.version     = VERSION;
+        meta.company     = COMPANY;
+        meta.buildNumber = BUILD_NUM;
+    }
+
+    function setupApp():Void {
         app.main      = "Main";
-        app.file      = "Fragile";
+        app.file      = GAME_TITLE;
         app.path      = "export";
         app.preloader = "flixel.system.FlxPreloader";
+    }
 
-        window.fps        = 60;
+    function setupSources():Void {
+        classPaths.push("source");
+    }
+
+    function setupLibraries():Void {
+        haxelibs.push({ name: "lime",           version: "8.3.2" });
+        haxelibs.push({ name: "openfl",         version: "9.5.2" });
+        haxelibs.push({ name: "flixel",         version: "6.1.2" });
+        haxelibs.push({ name: "flixel-addons",  version: "4.0.1" });
+        haxelibs.push({ name: "haxeui-core",    version: "1.6.0" });
+        haxelibs.push({ name: "haxeui-flixel",  version: "1.6.0" });
+    }
+
+    function setupDesktop():Void {
+        window.width       = GAME_WIDTH;
+        window.height      = GAME_HEIGHT;
+        window.fps         = FRAMERATE;
+        window.background  = BG_COLOR;
+        window.hardware    = true;
+        window.vsync       = false;
+        window.resizable   = true;
+        window.fullscreen  = false;
+        window.title       = GAME_TITLE;
+
+        haxedefs.push({ name: "desktop",         value: "" });
+        haxedefs.push({ name: "FRAGILE_DESKTOP", value: "" });
+
+        icons.push({ path: "assets/icon.png" });
+    }
+
+    function setupAndroid():Void {
+        window.width       = 0;
+        window.height      = 0;
+        window.fps         = FRAMERATE;
+        window.background  = BG_COLOR;
+        window.hardware    = true;
+        window.vsync       = false;
+        window.fullscreen  = true;
+        window.orientation = Orientation.LANDSCAPE;
+
+        haxedefs.push({ name: "mobile",          value: "" });
+        haxedefs.push({ name: "android",         value: "" });
+        haxedefs.push({ name: "FRAGILE_MOBILE",  value: "" });
+        haxedefs.push({ name: "FRAGILE_ANDROID", value: "" });
+
+        dependencies.push("android.permission.VIBRATE");
+        dependencies.push("android.permission.WRITE_EXTERNAL_STORAGE");
+        dependencies.push("android.permission.READ_EXTERNAL_STORAGE");
+
+        icons.push({ path: "assets/icon.png" });
+    }
+
+    function setupIOS():Void {
+        window.width       = 0;
+        window.height      = 0;
+        window.fps         = FRAMERATE;
+        window.background  = BG_COLOR;
+        window.hardware    = true;
+        window.vsync       = false;
+        window.fullscreen  = true;
+        window.orientation = Orientation.LANDSCAPE;
+
+        haxedefs.push({ name: "mobile",       value: "" });
+        haxedefs.push({ name: "ios",          value: "" });
+        haxedefs.push({ name: "FRAGILE_MOBILE", value: "" });
+        haxedefs.push({ name: "FRAGILE_IOS",  value: "" });
+
+        icons.push({ path: "assets/icon.png" });
+    }
+
+    function setupHTML5():Void {
+        window.width      = GAME_WIDTH;
+        window.height     = GAME_HEIGHT;
+        window.fps        = FRAMERATE;
+        window.background = BG_COLOR;
         window.hardware   = true;
         window.vsync      = false;
-        window.background = 0x000000;
+        window.resizable  = false;
+
+        haxedefs.push({ name: "web",          value: "" });
+        haxedefs.push({ name: "html5",        value: "" });
+        haxedefs.push({ name: "FRAGILE_WEB",  value: "" });
+    }
+
+    function setupAssets():Void {
+        if (defines.exists("android") || defines.exists("ios")) {
+            assets.push({ path: "assets/images",  rename: "assets/images",  type: AssetType.IMAGE  });
+            assets.push({ path: "assets/maps",    rename: "assets/maps",    type: AssetType.BINARY });
+            assets.push({ path: "assets/music",   rename: "assets/music",   type: AssetType.MUSIC  });
+            assets.push({ path: "assets/sounds",  rename: "assets/sounds",  type: AssetType.SOUND  });
+            assets.push({ path: "assets/fonts",   rename: "assets/fonts",   type: AssetType.FONT   });
+            assets.push({ path: "assets/data",    rename: "assets/data",    type: AssetType.TEXT   });
+            assets.push({ path: "assets/shaders", rename: "assets/shaders", type: AssetType.TEXT   });
+        } else {
+            assets.push({ path: "assets", rename: "assets" });
+        }
+    }
+
+    function setupDefines():Void {
+        haxedefs.push({ name: "FRAGILE_VERSION", value: VERSION });
+        haxedefs.push({ name: "openfl",          value: "" });
+        haxedefs.push({ name: "FLX_NO_MOUSE_ADVANCED_INPUT", value: "" });
+        haxedefs.push({ name: "FLX_NO_PITCH",    value: "" });
 
         if (defines.exists("android") || defines.exists("ios")) {
-            window.width       = 0;
-            window.height      = 0;
-            window.fullscreen  = true;
-            window.orientation = Orientation.LANDSCAPE;
+            haxedefs.push({ name: "FLX_NO_KEYBOARD", value: "" });
+        }
 
-            haxedefs.push({ name: "mobile", value: "" });
-            haxedefs.push({ name: "FRAGILE_MOBILE", value: "" });
-
-            assets.push({ path: "assets/images",  rename: "assets/images",  type: AssetType.IMAGE });
-            assets.push({ path: "assets/maps",    rename: "assets/maps",    type: AssetType.BINARY });
-            assets.push({ path: "assets/sounds",  rename: "assets/sounds",  type: AssetType.SOUND });
-            assets.push({ path: "assets/music",   rename: "assets/music",   type: AssetType.MUSIC });
-            assets.push({ path: "assets/fonts",   rename: "assets/fonts",   type: AssetType.FONT });
-            assets.push({ path: "assets/data",    rename: "assets/data",    type: AssetType.TEXT });
-        } else if (defines.exists("html5")) {
-            window.width     = 1280;
-            window.height    = 720;
-            window.resizable = false;
-
-            haxedefs.push({ name: "web", value: "" });
-            haxedefs.push({ name: "FRAGILE_WEB", value: "" });
-
-            assets.push({ path: "assets", rename: "assets" });
-        } else {
-            window.width     = 1280;
-            window.height    = 720;
-            window.resizable = true;
-            window.fullscreen = false;
-
-            haxedefs.push({ name: "desktop", value: "" });
-            haxedefs.push({ name: "FRAGILE_DESKTOP", value: "" });
-
-            assets.push({ path: "assets", rename: "assets" });
+        if (defines.exists("html5")) {
+            haxedefs.push({ name: "FLX_NO_NATIVE_CURSOR", value: "" });
         }
 
         if (defines.exists("debug")) {
-            haxedefs.push({ name: "FLX_DEBUG",          value: "" });
-            haxedefs.push({ name: "FRAGILE_DEBUG",      value: "" });
+            haxedefs.push({ name: "FRAGILE_DEBUG", value: "" });
+            haxedefs.push({ name: "FLX_DEBUG",     value: "" });
+        }
+    }
+
+    function setupFlags():Void {
+        if (defines.exists("debug")) {
             haxeflags.push("-dce no");
+            haxeflags.push("--debug");
         } else {
             haxeflags.push("-dce full");
             haxeflags.push("--no-traces");
             haxeflags.push("-O2");
+
+            if (!defines.exists("html5"))
+                haxeflags.push("--analyzer-optimize");
         }
 
-        classPaths.push("source");
-
-        haxelibs.push({ name: "flixel",        version: "6.1.2" });
-        haxelibs.push({ name: "flixel-addons", version: "4.0.1" });
-        haxelibs.push({ name: "lime",          version: "8.3.2" });
-
-        icons.push({ path: "assets/icon.png" });
+        haxeflags.push("-lib haxeui-flixel");
     }
 }
