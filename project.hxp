@@ -1,0 +1,77 @@
+import lime.project.*;
+
+class Project extends HXProject {
+    public function new() {
+        super();
+
+        meta.title       = "Fragile";
+        meta.packageName = "com.brenninho.fragile";
+        meta.version     = "1.0.0";
+        meta.company     = "Brenninho";
+        meta.buildNumber = "1";
+
+        app.main      = "Main";
+        app.file      = "Fragile";
+        app.path      = "export";
+        app.preloader = "flixel.system.FlxPreloader";
+
+        window.fps        = 60;
+        window.hardware   = true;
+        window.vsync      = false;
+        window.background = 0x000000;
+
+        if (defines.exists("android") || defines.exists("ios")) {
+            window.width       = 0;
+            window.height      = 0;
+            window.fullscreen  = true;
+            window.orientation = Orientation.LANDSCAPE;
+
+            haxedefs.push({ name: "mobile", value: "" });
+            haxedefs.push({ name: "FRAGILE_MOBILE", value: "" });
+
+            assets.push({ path: "assets/images",  rename: "assets/images",  type: AssetType.IMAGE });
+            assets.push({ path: "assets/maps",    rename: "assets/maps",    type: AssetType.BINARY });
+            assets.push({ path: "assets/sounds",  rename: "assets/sounds",  type: AssetType.SOUND });
+            assets.push({ path: "assets/music",   rename: "assets/music",   type: AssetType.MUSIC });
+            assets.push({ path: "assets/fonts",   rename: "assets/fonts",   type: AssetType.FONT });
+            assets.push({ path: "assets/data",    rename: "assets/data",    type: AssetType.TEXT });
+        } else if (defines.exists("html5")) {
+            window.width     = 1280;
+            window.height    = 720;
+            window.resizable = false;
+
+            haxedefs.push({ name: "web", value: "" });
+            haxedefs.push({ name: "FRAGILE_WEB", value: "" });
+
+            assets.push({ path: "assets", rename: "assets" });
+        } else {
+            window.width     = 1280;
+            window.height    = 720;
+            window.resizable = true;
+            window.fullscreen = false;
+
+            haxedefs.push({ name: "desktop", value: "" });
+            haxedefs.push({ name: "FRAGILE_DESKTOP", value: "" });
+
+            assets.push({ path: "assets", rename: "assets" });
+        }
+
+        if (defines.exists("debug")) {
+            haxedefs.push({ name: "FLX_DEBUG",          value: "" });
+            haxedefs.push({ name: "FRAGILE_DEBUG",      value: "" });
+            haxeflags.push("-dce no");
+        } else {
+            haxeflags.push("-dce full");
+            haxeflags.push("--no-traces");
+            haxeflags.push("-O2");
+        }
+
+        classPaths.push("source");
+
+        haxelibs.push({ name: "flixel",        version: "6.1.2" });
+        haxelibs.push({ name: "flixel-addons", version: "4.0.1" });
+        haxelibs.push({ name: "lime",          version: "8.3.2" });
+
+        icons.push({ path: "assets/icon.png" });
+    }
+}
